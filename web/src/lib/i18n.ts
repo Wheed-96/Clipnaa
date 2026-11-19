@@ -60,6 +60,8 @@ const en = {
     sent: "Check your inbox for the sign-in link.",
     google: "Continue with Google",
     or: "or",
+    invalid: "Please enter a valid email address.",
+    failed: "We couldn't send the link. Please try again in a minute.",
   },
   dash: {
     title: "Your videos",
@@ -163,6 +165,8 @@ const ar: Dict = {
     sent: "تفقد بريدك، أرسلنا لك رابط الدخول.",
     google: "المتابعة باستخدام Google",
     or: "أو",
+    invalid: "اكتب بريد إلكتروني صحيح.",
+    failed: "ما قدرنا نرسل الرابط. حاول مرة ثانية بعد دقيقة.",
   },
   dash: {
     title: "فيديوهاتك",
