@@ -69,5 +69,4 @@ cd web && npm run build && npm run lint
 
 ## Not built yet
 - Posting to YouTube, Instagram and TikTok from Clipnaa. The OAuth apps need platform review, so submit those early.
-- Terms, privacy and refund pages. Paddle requires them before approving the live account.
 - Annual plans, extra-minute packs, brand kit, teams, scheduling.
