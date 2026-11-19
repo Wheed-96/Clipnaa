@@ -36,7 +36,7 @@ class SupabaseDB:
     @classmethod
     def from_env(cls):
         from supabase import create_client
-        return cls(create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"]))
+        return cls(create_client(_supabase_url(), os.environ["SUPABASE_SERVICE_ROLE_KEY"].strip()))
 
     def get_job(self, job_id: str) -> dict:
         return self.sb.table("jobs").select("*").eq("id", job_id).single().execute().data
@@ -56,3 +56,13 @@ class SupabaseDB:
     def insert_clips(self, rows: list[dict]) -> None:
         if rows:
             self.sb.table("clips").upsert(rows, on_conflict="job_id,idx").execute()
+
+
+def _supabase_url() -> str:
+    """Accept common copy-paste slips: spaces, quotes, no https://, or a path such as /rest/v1/."""
+    from urllib.parse import urlparse
+    raw = os.environ["SUPABASE_URL"].strip().strip("'\"")
+    if not raw.lower().startswith(("http://", "https://")):
+        raw = "https://" + raw
+    u = urlparse(raw)
+    return f"{u.scheme}://{u.netloc}"

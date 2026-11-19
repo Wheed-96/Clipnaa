@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 const LANGS = ["ar", "en"];
 
@@ -19,8 +20,8 @@ export async function proxy(request: NextRequest) {
   // Keep the Supabase login session fresh.
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
