@@ -21,8 +21,13 @@ How a video flows through the system:
 ### 1. Supabase (database and login)
 1. Create a project at supabase.com. Then open **SQL editor**, paste `supabase/migrations/0001_init.sql` and run it.
 2. Under **Authentication → URL configuration**, set the Site URL to your domain, for example `https://clipnaa.com`. Add `https://clipnaa.com/auth/callback` and `http://localhost:3000/auth/callback` as redirect URLs.
-3. Optional: under **Authentication → Providers → Google**, turn on Google sign-in.
-4. Copy the project URL, the anon key and the service role key from **Project settings → API**.
+3. Under **Authentication → Emails**, edit both the **Magic Link** and **Confirm signup** templates. Replace the link `{{ .ConfirmationURL }}` with:
+   ```
+   {{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email
+   ```
+   The link then opens Clipnaa directly, and our server verifies it. Visitors' browsers never have to reach `supabase.co`, which some networks block.
+4. Optional: under **Authentication → Providers → Google**, turn on Google sign-in. Google sign-in still passes through `supabase.co` in the visitor's browser.
+5. Copy the project URL, the anon key and the service role key from **Project settings → API**.
 
 ### 2. Cloudflare R2 (video storage)
 1. Create a bucket named `clipnaa`, then create an API token with read and write access to it.
