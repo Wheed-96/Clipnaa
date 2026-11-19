@@ -84,9 +84,6 @@ export default async function Landing() {
           </div>
         </section>
       </main>
-      <footer className="border-t border-black/5 py-8 text-center text-sm text-muted">
-        © 2026 {d.brand}. {d.footer.rights}
-      </footer>
     </>
   );
 }
