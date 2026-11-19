@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { SUPABASE_URL } from "@/lib/supabase/config";
 import { supabaseServer } from "@/lib/supabase/server";
 
 /**
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
 /** No answer from Supabase: almost always a wrong NEXT_PUBLIC_SUPABASE_URL. The host is not a secret. */
 function unreachable(err: unknown) {
   let host = "an invalid address";
-  try { host = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").host; } catch {}
+  try { host = new URL(SUPABASE_URL).host; } catch {}
   console.error(`Could not reach Supabase at ${host}:`, err);
   return NextResponse.json(
     { error: "unreachable", detail: `Could not reach Supabase at ${host}. Check NEXT_PUBLIC_SUPABASE_URL in Vercel.` },
