@@ -1,7 +1,7 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { supabaseServer } from "@/lib/supabase/server";
+import { supabaseAdmin, supabaseServer } from "@/lib/supabase/server";
 
 export type Profile = {
   id: string;
@@ -21,8 +21,37 @@ export async function requireUser(lang: string) {
   const supabase = await supabaseServer();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect(`/${lang}/login`);
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
-  return { supabase, user: data.user, profile: profile as Profile };
+  const user = data.user;
+  const { data: found, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  let profile = found as Profile | null;
+  if (error) console.error("profiles select failed:", error.message);
+  if (!profile && !error) {
+    // Accounts created before the database trigger existed have no profile row: create it now.
+    try {
+      const created = await supabaseAdmin()
+        .from("profiles")
+        .upsert({ id: user.id, email: user.email ?? null }, { onConflict: "id" })
+        .select("*")
+        .single();
+      if (created.error) console.error("profile create failed:", created.error.message);
+      profile = created.data as Profile | null;
+    } catch (err) {
+      console.error("profile create failed:", err);
+    }
+  }
+  // Never crash the page over a missing row: fall back to the free plan.
+  const safe: Profile = profile ?? {
+    id: user.id,
+    email: user.email ?? null,
+    plan: "free",
+    minutes_quota: 30,
+    minutes_used: 0,
+    period_start: new Date().toISOString(),
+    subscription_status: null,
+    billing_manage_url: null,
+    billing_cancel_url: null,
+  };
+  return { supabase, user, profile: safe };
 }
 
 /** For route handlers: the user id, or null when signed out. */
