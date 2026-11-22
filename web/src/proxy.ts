@@ -17,6 +17,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Supabase sends people to the Site URL when the link's redirect address is not on its
+  // allow list. Hand any sign-in code that lands on a page to the callback route.
+  const params = request.nextUrl.searchParams;
+  if (params.has("code") || params.has("token_hash")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    if (!params.has("next")) url.searchParams.set("next", `/${first}/dashboard`);
+    return NextResponse.redirect(url);
+  }
+
   // Keep the Supabase login session fresh.
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
@@ -40,6 +50,13 @@ export async function proxy(request: NextRequest) {
   if (isPrivate && !data?.claims) {
     const url = request.nextUrl.clone();
     url.pathname = `/${first}/login`;
+    return NextResponse.redirect(url);
+  }
+  // Already signed in: skip the login page.
+  if (data?.claims && pathname === `/${first}/login`) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${first}/dashboard`;
+    url.search = "";
     return NextResponse.redirect(url);
   }
   return response;
