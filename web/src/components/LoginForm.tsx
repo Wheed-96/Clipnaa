@@ -2,11 +2,12 @@
 import { useState } from "react";
 import { t, type Lang } from "@/lib/i18n";
 
-export function LoginForm({ lang }: { lang: Lang }) {
+export function LoginForm({ lang, linkFailed = false }: { lang: Lang; linkFailed?: boolean }) {
   const d = t(lang).login;
   const [email, setEmail] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [error, setError] = useState("");
+  // /auth/callback sends people back with ?error=1 when a sign-in link fails.
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">(linkFailed ? "error" : "idle");
+  const [error, setError] = useState(linkFailed ? d.linkFailed : "");
 
   // Both sign-in methods go through our own server, so the browser never calls Supabase directly.
   async function sendLink(e: React.FormEvent) {

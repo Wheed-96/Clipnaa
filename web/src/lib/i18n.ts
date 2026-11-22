@@ -62,6 +62,7 @@ const en = {
     or: "or",
     invalid: "Please enter a valid email address.",
     failed: "We couldn't send the link. Please try again in a minute.",
+    linkFailed: "That sign-in link didn't work. It may have expired, been used already, or been opened in a different browser. Request a new link and open it in this same browser.",
   },
   dash: {
     title: "Your videos",
@@ -167,6 +168,7 @@ const ar: Dict = {
     or: "أو",
     invalid: "اكتب بريد إلكتروني صحيح.",
     failed: "ما قدرنا نرسل الرابط. حاول مرة ثانية بعد دقيقة.",
+    linkFailed: "رابط الدخول ما اشتغل. يمكن انتهت صلاحيته، أو استُخدم قبل، أو فتحته في متصفح ثاني. اطلب رابط جديد وافتحه في نفس هذا المتصفح.",
   },
   dash: {
     title: "فيديوهاتك",
