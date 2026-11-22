@@ -16,8 +16,11 @@ type Subscription = {
 /** Paddle tells us about subscription changes here. Set this URL in Paddle -> Notifications. */
 export async function POST(request: NextRequest) {
   const raw = await request.text();
-  const ok = verifyPaddleSignature(raw, request.headers.get("paddle-signature"), process.env.PADDLE_WEBHOOK_SECRET!);
-  if (!ok) return NextResponse.json({ error: "bad signature" }, { status: 401 });
+  const ok = verifyPaddleSignature(raw, request.headers.get("paddle-signature"), (process.env.PADDLE_WEBHOOK_SECRET ?? "").trim());
+  if (!ok) {
+    console.error("Paddle webhook: bad signature. Check PADDLE_WEBHOOK_SECRET matches the notification destination's secret key.");
+    return NextResponse.json({ error: "bad signature" }, { status: 401 });
+  }
 
   const event = JSON.parse(raw) as { event_type: string; data: Subscription };
   if (!event.event_type.startsWith("subscription.")) return NextResponse.json({ ok: true });
@@ -29,14 +32,17 @@ export async function POST(request: NextRequest) {
   const { data: profile } = userId
     ? await query.eq("id", userId).maybeSingle()
     : await query.eq("paddle_subscription_id", sub.id).maybeSingle();
-  if (!profile) return NextResponse.json({ ok: true, note: "no matching user" });
+  if (!profile) {
+    console.error("Paddle webhook: no matching user for", userId ?? sub.id);
+    return NextResponse.json({ ok: true, note: "no matching user" });
+  }
 
   const active = ["active", "trialing", "past_due"].includes(sub.status);
   const plan = active ? planForPriceId(sub.items[0]?.price.id) ?? PLANS.free : PLANS.free;
   const periodStart = sub.current_billing_period?.starts_at;
   const newPeriod = periodStart && new Date(periodStart) > new Date(profile.period_start);
 
-  await admin
+  const { error } = await admin
     .from("profiles")
     .update({
       plan: plan.id,
@@ -50,6 +56,10 @@ export async function POST(request: NextRequest) {
       ...(newPeriod ? { period_start: periodStart, minutes_used: 0 } : {}),
     })
     .eq("id", profile.id);
-
+  if (error) {
+    console.error("Paddle webhook: profile update failed:", error.message);
+    return NextResponse.json({ error: "update failed" }, { status: 500 }); // Paddle retries
+  }
+  if (plan.id === "free" && active) console.error("Paddle webhook: unknown price", sub.items[0]?.price.id);
   return NextResponse.json({ ok: true });
 }
