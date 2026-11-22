@@ -1,0 +1,44 @@
+# Deploys the video worker (worker/modal_app.py) to Modal.
+# Needs two repository secrets: MODAL_TOKEN_ID and MODAL_TOKEN_SECRET
+# (Modal -> Settings -> API Tokens -> New Token).
+name: Deploy worker to Modal
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["worker/**", ".github/workflows/deploy-worker.yml"]
+
+concurrency:
+  group: deploy-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Modal token
+        run: |
+          if [ -z "$MODAL_TOKEN_ID" ] || [ -z "$MODAL_TOKEN_SECRET" ]; then
+            echo "::error::Add MODAL_TOKEN_ID and MODAL_TOKEN_SECRET under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+      - run: pip install modal
+      - name: Deploy
+        working-directory: worker
+        run: modal deploy modal_app.py | tee deploy.log
+      - name: Show the worker URL for Vercel
+        working-directory: worker
+        run: |
+          url=$(grep -oE 'https://[^ ]*enqueue[^ ]*\.modal\.run' deploy.log | head -1)
+          echo "WORKER_URL = $url"
+          echo "### Put this in Vercel as WORKER_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`$url\`" >> "$GITHUB_STEP_SUMMARY"
