@@ -51,7 +51,7 @@ const en = {
     current: "Current plan",
     start: "Start free",
   },
-  footer: { rights: "All rights reserved.", terms: "Terms", privacy: "Privacy" },
+  footer: { rights: "All rights reserved.", terms: "Terms", privacy: "Privacy", refund: "Refunds", updated: "Last updated" },
   login: {
     title: "Log in to Clipnaa",
     sub: "We'll email you a sign-in link. New here? The same link creates your account.",
@@ -156,7 +156,7 @@ const ar: Dict = {
     current: "باقتك الحالية",
     start: "ابدأ مجانًا",
   },
-  footer: { rights: "جميع الحقوق محفوظة.", terms: "الشروط", privacy: "الخصوصية" },
+  footer: { rights: "جميع الحقوق محفوظة.", terms: "الشروط", privacy: "الخصوصية", refund: "الاسترداد", updated: "آخر تحديث" },
   login: {
     title: "سجّل دخولك إلى كليبنا",
     sub: "بنرسل لك رابط دخول على إيميلك. جديد؟ نفس الرابط ينشئ لك حساب.",

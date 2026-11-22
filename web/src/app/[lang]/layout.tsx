@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { lang } from "next/root-params";
+import { Footer } from "@/components/Footer";
 import { isLang, LANGS, t } from "@/lib/i18n";
 import "../globals.css";
 
@@ -29,7 +30,10 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
           href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap"
         />
       </head>
-      <body className="min-h-screen">{children}</body>
+      <body className="flex min-h-screen flex-col">
+        <div className="flex-1">{children}</div>
+        <Footer lang={current} />
+      </body>
     </html>
   );
 }
